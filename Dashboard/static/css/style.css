@@ -1,0 +1,96 @@
+
+#plot {
+    margin-top: 30px;
+}
+.control-panel {
+    margin-top: 30px;
+}
+
+.table-responsive {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+
+
+.highlighted-row {
+    background-color: #f0f0f0;
+}
+
+#datagrid-table {
+    table-layout: auto;
+}
+
+#datagrid-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 101;
+}
+
+#datagrid-table td {
+    height: 10px;
+    vertical-align: middle;
+}
+
+
+#feature-list {
+    max-height: 150px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    margin-right: 25px;
+    width: 50%;
+}
+
+.list-group-item.active {
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;
+}
+
+#feature-list .list-group-item {
+    padding: 5px 15px;
+    margin-bottom: 2px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+
+
+
+
+  .container_parameter {
+    display: flex;
+    justify-content: start;
+    gap: 10px; /* Adjust the space between each input field */
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  input[type="number"] {
+    width: 45px; /* Makes the input fields smaller */
+    height: 25px; /* Adjust height as needed */
+  }
+  label {
+    margin-bottom: 1px;
+  }
+
+.flex-buttons {
+    display: flex;
+    justify-content: start;
+    flex-wrap: nowrap;
+    gap: 60px; /* Increased gap for better visual separation */
+}
+
+.flex-buttons button {
+    padding: 4px 8px; /* Increased padding for better button size */
+    font-size: 16px; /* Increased font size for better readability */
+    line-height: 1.3; /* Adjusted line height */
+    white-space: nowrap;
+}

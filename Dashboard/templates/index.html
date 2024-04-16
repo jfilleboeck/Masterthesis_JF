@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript">
+        var feature_names = {{ feature_names|tojson}};
+        var xData = {{ x_data|tojson }};
+        var yData = {{ y_data|tojson }};
+        var isNumericFeature = {{ is_numeric_feature|tojson }};
+        var hist_data = {{ hist_data|tojson }};
+        var bin_edges = {{ bin_edges|tojson }};
+    </script>
+    <title>Interactive Plot</title>
+    <link href="../static/css/style.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <label for="display-feature" class="mr-2">Display Feature:</label>
+    <!-- Hier noch einfügen, dass das erste numerische Feature angezeigt wird -->
+    <select id="display-feature" class="form-control mr-2">
+        <!-- Options will be dynamically populated -->
+        {% for item in feature_names %}
+        <option value="{{ item }}">{{ item }}</option>
+        {% endfor %}
+    </select>
+    <div class="row">
+        <div class="col-md-8">
+            <div id="plot"></div>
+        </div>
+        <!-- Column for the histogram -->
+        <div class="col-md-4">
+            <div id="histogram-plot"></div>
+            <p style="margin-bottom: 10px;"><b>Incorporate multiple features into model:</b></p>
+            <form class="form-inline" style="margin-bottom: 10px;">
+            <div id="feature-list" class="list-group">
+                {% for item in feature_names %}
+                <a href="#" class="list-group-item list-group-item-action" data-value="{{ item }}">{{ item }}</a>
+                {% endfor %}
+            </div>
+            <script>
+                var selectedFeatures = []; // This will hold the selected feature names
+                document.querySelectorAll('#feature-list .list-group-item').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent default link behavior
+
+                        var featureValue = this.getAttribute('data-value');
+                        var featureIndex = selectedFeatures.indexOf(featureValue);
+
+                        if(featureIndex > -1) {
+                            // If feature is already selected, remove it
+                            selectedFeatures.splice(featureIndex, 1);
+                            this.classList.remove('active'); // Remove highlighting
+                        } else {
+                            // If feature is not selected, add it
+                            selectedFeatures.push(featureValue);
+                            this.classList.add('active'); // Add highlighting
+                        }
+
+                        console.log('Selected Features:', selectedFeatures); // Log the selected features to the console
+                    });
+                });
+            </script>
+                <div class="button-container" style="display: flex; flex-direction: column;">
+                    <button class="btn btn-info mb-2" onclick="SplineInterpolation(selectedFeatures); return false;">Spline Interpol.</button>
+                    <button class="btn btn-info" onclick="sendRetrainRequest(); return false;">Retrain Feature</button>
+                </div>
+                <p style="margin-bottom: 10px;"><b>Hyperparameters for Retrain Feature Method</b></p>
+                <div class="container_parameter" style="margin-bottom: 0px; margin-top: 0px">
+                  <div class="field">
+                    <label for="hidden_elmAlpha">Elm Alpha</label>
+                    <input type="number" id="hidden_elmAlpha" value="1">
+                  </div>
+                  <div class="field">
+                    <label for="hidden_elmScale">ELM Scale</label>
+                    <input type="number" id="hidden_elmScale" value="1">
+                  </div>
+                  <div class="field">
+                    <label for="hidden_nrSyntheticDataPoints">Nr. Synth. Data</label>
+                    <input type="number" id="hidden_nrSyntheticDataPoints" value="0">
+                  </div>
+                </div>
+            </form>
+        </div>
+
+
+    <div class="control-panel mt-4" style="margin-top: 0px">
+        <p><b>Adjust the shape function:</b></p>
+        <form class="form-inline" style="margin-bottom: 20px;">
+            <input type="number" class="form-control mr-2" style="width: 75px;" id="x1-value" placeholder="x1">
+            <input type="number" class="form-control mr-2" style="width: 75px;" id="x2-value" placeholder="x2">
+            <input type="number" class="form-control mr-2" style="width: 130px;" id="new-y-value" placeholder="new y-value">
+            <button class="btn btn-primary mr-2" onclick="setConstantValue(); return false;">Set Constant Value</button>
+            <button class="btn btn-primary mr-2" onclick="setLinear(); return false;">Set Linear</button>
+            <button class="btn btn-primary mr-2" onclick="setMonotonicIncrease(); return false;">Monotonic Increase</button>
+            <button class="btn btn-primary mr-2" onclick="setMonotonicDecrease(); return false;">Monotonic Decrease</button>
+            <button class="btn btn-primary mr-2" onclick="setSmooth(); return false;">Smooth</button>
+        </form>
+        <p style="margin-bottom: 10px;"><b>Metrics & Model Reset:</b></p>
+        <form class="form-inline">
+                <button class="btn btn-success mr-2" onclick="predictAndGetMetrics(); return false;">Get Metrics</button>
+                <div id="metric-output" class="btn btn-success mr-2" style="margin-right: 8px";>Calculating Metrics...</div>
+            <button class="btn btn-danger" style="margin-right: 8px" onclick="resetGraph(); return false;">Reset</button>
+        </form>
+        <p style="margin-top: 15px;"><b>Data Visualisation:</b></p>
+
+<div class="flex-buttons" style="margin-top: 5px; margin-bottom: 10px" >
+    <button id="validation-data-button">Validation Data</button>
+    <button id="instance-explanations-button">Instance Explanations</button>
+    <button id="shape-functions-button">Display all shape functions</button>
+    <button id="correlation-matrix-button">Display correlation matrix</button>
+    </div>
+
+    <div id="datagrid-table" class="content-section"></div>
+    <div id="instance-explanations-content" class="content-section">
+        <p>Instance explanations content goes here.</p>
+    </div>
+    <div id="shape-functions-content" class="content-section">
+        <p>All shape functions content goes here.</p>
+    </div>
+    <div id="correlation-matrix-content" class="content-section">
+        <p>Correlation matrix content goes here.</p>
+    </div>
+    </div>
+    <script src="../static/js/script.js"></script>
+</body>
+</html>
